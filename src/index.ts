@@ -31,15 +31,15 @@ const TASK_PATH_PREFIX = '/v1/tasks/';
  */
 const ueaigcAuthorization = {
   id: AUTH_ID,
-  platform: 'aimaxhug',
+  platform: 'ueaigc',
   type: AuthorizationType.HeaderBearerToken,
   required: true,
   label: 'ueaigc',
   tooltips: '请关联 ueaigc 账号（API Key，见 https://ai.ueaigc.com 获取）',
   instructionsUrl: API_DOC_URL,
   icon: {
-    light: 'https://img.alicdn.com/imgextra/i4/O1CN01Z5paLz1O0zuCC7osS_!!6000000001644-55-tps-83-82.png',
-    dark: 'https://img.alicdn.com/imgextra/i4/O1CN01Z5paLz1O0zuCC7osS_!!6000000001644-55-tps-83-82.png',
+    light: 'https://ai.ueaigc.com/img/logo.png',
+    dark: 'https://ai.ueaigc.com/img/logo.png',
   },
 };
 
@@ -89,7 +89,7 @@ fieldDecoratorKit.setDecorator({
   name: 'AI 生图多模型',
   i18nMap: {
     'zh-CN': {
-      tagline: '生图最强！中文稳，细节炸！',
+      tagline: '支持多种生图模型，可自定义提示词、参考图、分辨率、比例、模型与生成张数',
       authLabel: 'ueaigc',
       authTooltips: '请关联 ueaigc 账号以调用生图 API',
       promptLabel: '提示词',
@@ -112,10 +112,10 @@ fieldDecoratorKit.setDecorator({
       modelTooltip: 'GPT Image 系列官方模型',
       imageCountLabel: '生成张数',
       imageCountPlaceholder:
-        '填写 1-10 的整数，或引用字段。不填默认为 1；对应 API 参数 n',
+        '填写 1-5 的整数，或引用字段。不填默认为 1；对应 API 参数 n',
       imageCountTooltip:
         '一次请求生成的图片数量。可引用数字/文本字段，按行生成不同张数。',
-      errorImageCountInvalid: '生成张数须为 1-10 的整数',
+      errorImageCountInvalid: '生成张数须为 1-5 的整数',
       res1k: '1K（默认）',
       res2k: '2K',
       res4k: '4K',
@@ -189,7 +189,7 @@ fieldDecoratorKit.setDecorator({
         '1-10 の整数、またはフィールド参照。未入力は 1（API パラメータ n）',
       imageCountTooltip:
         '1 回のリクエストで生成する画像枚数。行ごとにフィールド参照可。',
-      errorImageCountInvalid: '生成枚数は 1-10 の整数で入力してください',
+      errorImageCountInvalid: '生成枚数は 1-5 の整数で入力してください',
       res1k: '1K（デフォルト）',
       res2k: '2K',
       res4k: '4K',
