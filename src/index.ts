@@ -32,7 +32,7 @@ const TASK_PATH_PREFIX = '/v1/tasks/';
 const ueaigcAuthorization = {
   id: AUTH_ID,
   platform: 'ueaigc',
-  type: AuthorizationType.HeaderBearerToken,
+  type: AuthorizationType.HeaderBearerToken as AuthorizationType.HeaderBearerToken,
   required: true,
   label: 'ueaigc',
   tooltips: '请关联 ueaigc 账号（API Key，见 https://ai.ueaigc.com 获取）',
@@ -200,8 +200,7 @@ fieldDecoratorKit.setDecorator({
       errorAuth: '先に ueaigc アカウントを連携してください',
     },
   },
-  // 须为数组，否则配置面板不展示「+ 关联账号」
-  authorizations: [ueaigcAuthorization] as any,
+  authorizations: ueaigcAuthorization,
   errorMessages: {
     promptRequired: t('errorPromptRequired'),
     noImage: t('errorNoImage'),
