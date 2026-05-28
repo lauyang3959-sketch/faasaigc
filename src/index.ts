@@ -61,7 +61,7 @@ type ImageGenFormData = {
 
 /** API 参数 n：单次生成图片张数 */
 const IMAGE_COUNT_MIN = 1;
-const IMAGE_COUNT_MAX = 10;
+const IMAGE_COUNT_MAX = 5;
 
 /** 下拉项 key 不使用冒号，避免 schema 校验失败 */
 const RATIO_KEY_TO_API: Record<string, string> = {
