@@ -104,9 +104,9 @@ fieldDecoratorKit.setDecorator({
         '控制出图清晰度（映射为 API 的 quality 参数）。1k 适合草稿与批量试稿；2k 适合多数业务配图；4k 适合海报、印刷级细节。支持引用字段，按行动态切换分辨率。',
       ratioLabel: '比例',
       ratioPlaceholder:
-        '填写 auto、1:1、16:9、9:16、4:3、3:4 等或引用字段。横图 16:9/4:3 为 1536x1024，竖图 9:16/3:4 为 1024x1536，方图 1:1 为 1024x1024',
+        '填写 auto、1:1、16:9、9:16、4:3、3:4 等，或直接填写 size（如 1536x864 / 2560x1440 / 3840x2160），或引用字段',
       ratioTooltip:
-        '控制成片宽高比（映射为 API 的 size：1024×1024 / 1536×1024 / 1024×1536）。横版适合 Banner、封面；竖版适合手机海报、短视频封面；方图适合头像、商品主图。auto 在不确定比例时使用。',
+        '控制成片比例或 size。支持标准尺寸 1024×1024 / 1536×1024 / 1024×1536，也可直接填写 WxH（如 1024x3072）。WxH 的有效性以接口文档为准，最终由 API 校验。',
       modelLabel: 'AI 模型',
       modelPlaceholder: 'gpt-image-2 或 gpt-image-1.5，或点击「引用字段」',
       modelTooltip: 'GPT Image 系列官方模型',
@@ -116,6 +116,8 @@ fieldDecoratorKit.setDecorator({
       imageCountTooltip:
         '一次请求生成的图片数量。可引用数字/文本字段，按行生成不同张数。',
       errorImageCountInvalid: '生成张数须为 1-5 的整数',
+      errorSizeInvalid:
+        '比例/尺寸不合法，请填写 auto、常见比例（如 16:9）或 WxH（如 1024x1024）',
       res1k: '1K（默认）',
       res2k: '2K',
       res4k: '4K',
@@ -141,9 +143,9 @@ fieldDecoratorKit.setDecorator({
         'Maps to API quality. 1k for drafts; 2k for most production use; 4k for posters and fine detail. Supports per-row values via Reference Field.',
       ratioLabel: 'Aspect ratio',
       ratioPlaceholder:
-        'Enter auto, 1:1, 16:9, 9:16, 4:3, 3:4, or use Reference Field. Landscape 1536x1024, portrait 1024x1536, square 1024x1024',
+        'Enter auto, common ratios (e.g. 16:9), or a size like 1536x864 / 2560x1440 / 3840x2160, or use Reference Field',
       ratioTooltip:
-        'Maps to API size (1024×1024 / 1536×1024 / 1024×1536). Landscape for banners; portrait for mobile; square for avatars and product shots.',
+        'Controls aspect ratio or size. Supports standard sizes (1024×1024 / 1536×1024 / 1024×1536) and also accepts WxH (e.g. 1024x3072). Validity is determined by the API.',
       modelLabel: 'AI model',
       modelPlaceholder: 'Enter model name, or use Reference Field',
       modelTooltip: 'Official GPT Image models',
@@ -153,6 +155,8 @@ fieldDecoratorKit.setDecorator({
       imageCountTooltip:
         'Number of images per request. Reference a column for per-row counts.',
       errorImageCountInvalid: 'Image count must be an integer from 1 to 10',
+      errorSizeInvalid:
+        'Invalid ratio/size. Use auto, common ratios (e.g. 16:9), or WxH (e.g. 1024x1024).',
       res1k: '1K (default)',
       res2k: '2K',
       res4k: '4K',
@@ -178,9 +182,9 @@ fieldDecoratorKit.setDecorator({
         'API の quality に対応。1k は試作、2k は通常利用、4k はポスター・細部重視向け。行ごとにフィールド参照可。',
       ratioLabel: '比率',
       ratioPlaceholder:
-        'auto、1:1、16:9、9:16 等またはフィールド参照。横 1536x1024、縦 1024x1536、正方形 1024x1024',
+        'auto、1:1、16:9、9:16 等、または size（例：1536x864 / 2560x1440 / 3840x2160）、またはフィールド参照',
       ratioTooltip:
-        'API の size に対応。横長はバナー、縦長はモバイル向け、正方形はサムネ・商品画像向け。',
+        '比率または size を指定。標準サイズ（1024×1024 / 1536×1024 / 1024×1536）に対応し、WxH（例：1024x3072）も入力可能。可否は API 側で判定されます。',
       modelLabel: 'AI モデル',
       modelPlaceholder: 'モデル名を入力、または「フィールド参照」',
       modelTooltip: 'GPT Image 公式モデル',
@@ -190,6 +194,8 @@ fieldDecoratorKit.setDecorator({
       imageCountTooltip:
         '1 回のリクエストで生成する画像枚数。行ごとにフィールド参照可。',
       errorImageCountInvalid: '生成枚数は 1-5 の整数で入力してください',
+      errorSizeInvalid:
+        '比率/サイズが不正です。auto、一般的な比率（例：16:9）または WxH（例：1024x1024）を入力してください。',
       res1k: '1K（デフォルト）',
       res2k: '2K',
       res4k: '4K',
@@ -207,6 +213,7 @@ fieldDecoratorKit.setDecorator({
     apiError: t('errorApi'),
     authRequired: t('errorAuth'),
     imageCountInvalid: t('errorImageCountInvalid'),
+    sizeInvalid: t('errorSizeInvalid'),
   },
   formItems: [
     {
@@ -303,7 +310,17 @@ fieldDecoratorKit.setDecorator({
       };
     }
 
-    const body = buildChatfireImageBody(prompt, formData, refImageUrls, imageCount);
+    const model = normalizeModel(formData.model);
+    const size = resolveRatioToSize(formData.ratio);
+
+    const body = buildChatfireImageBody(
+      prompt,
+      model,
+      size,
+      formData.resolution,
+      refImageUrls,
+      imageCount,
+    );
 
     try {
       const resultUrls = await fetchAllImageUrls(context, body, imageCount);
@@ -347,16 +364,18 @@ export default fieldDecoratorKit;
 /** 按 ueaigc GPT-image 接口组装请求体 */
 function buildChatfireImageBody(
   prompt: string,
-  formData: ImageGenFormData,
+  model: string,
+  size: string,
+  resolution: string,
   imageUrls: string[],
   imageCount: number,
 ): Record<string, unknown> {
   const body: Record<string, unknown> = {
-    model: normalizeModel(formData.model),
+    model,
     prompt,
-    size: resolveRatioToSize(formData.ratio),
+    size,
     n: imageCount,
-    quality: resolutionToQuality(formData.resolution),
+    quality: resolutionToQuality(resolution),
     output_compression: 100,
     response_format: 'url',
   };
@@ -378,16 +397,39 @@ function resolutionToQuality(resolution?: string): string {
   return 'medium';
 }
 
-/** 比例映射为 API size（1024x1024 | 1536x1024 | 1024x1536） */
+/** 比例/尺寸映射为 API size（支持 auto / WxH / 标准三档；其余透传给 API） */
 function resolveRatioToSize(ratio?: string): string {
   const aspect = normalizeRatio(ratio);
+  const explicit = parseSizeString(aspect);
+  if (explicit) {
+    return explicit;
+  }
+  if (aspect === 'auto') {
+    return 'auto';
+  }
   if (aspect === '9:16' || aspect === '9:21' || aspect === '3:4') {
     return '1024x1536';
   }
   if (aspect === '16:9' || aspect === '21:9' || aspect === '4:3') {
     return '1536x1024';
   }
-  return '1024x1024';
+  if (aspect === '1:1') {
+    return '1024x1024';
+  }
+  return aspect;
+}
+
+function parseSizeString(value: string): string | null {
+  const match = value.match(/^(\d+)\s*x\s*(\d+)$/i);
+  if (!match) {
+    return null;
+  }
+  const width = parseInt(match[1], 10);
+  const height = parseInt(match[2], 10);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    return null;
+  }
+  return `${width}x${height}`;
 }
 
 /** 下拉选项或引用字段返回值统一为 API 使用的 1k / 2k / 4k */
