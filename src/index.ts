@@ -104,9 +104,9 @@ fieldDecoratorKit.setDecorator({
         '控制出图清晰度（映射为 API 的 quality 参数）。1k 适合草稿与批量试稿；2k 适合多数业务配图；4k 适合海报、印刷级细节。支持引用字段，按行动态切换分辨率。',
       ratioLabel: '比例',
       ratioPlaceholder:
-        '填写 auto、1:1、16:9、9:16、4:3、3:4 等，或直接填写 size（如 1536x864 / 2560x1440 / 3840x2160），或引用字段',
+        '填写 auto、1:1、16:9、9:16、4:3、3:4 等，或直接填写 size（如 1536x864 / 1536x1152 / 1152x1536 / 3840x2160），或引用字段',
       ratioTooltip:
-        '控制成片比例或 size。支持标准尺寸 1024×1024 / 1536×1024 / 1024×1536，也可直接填写 WxH（如 1024x3072）。WxH 的有效性以接口文档为准，最终由 API 校验。',
+        '控制成片比例或 size。当前比例映射为：1:1 -> 1024x1024，16:9 -> 1536x1024，9:16 -> 1024x1536，4:3 -> 1536x1152，3:4 -> 1152x1536；也可直接填写 WxH（如 1024x3072）。WxH 的有效性以接口文档为准，最终由 API 校验。',
       modelLabel: 'AI 模型',
       modelPlaceholder: 'gpt-image-2 或 gpt-image-1.5，或点击「引用字段」',
       modelTooltip: 'GPT Image 系列官方模型',
@@ -143,9 +143,9 @@ fieldDecoratorKit.setDecorator({
         'Maps to API quality. 1k for drafts; 2k for most production use; 4k for posters and fine detail. Supports per-row values via Reference Field.',
       ratioLabel: 'Aspect ratio',
       ratioPlaceholder:
-        'Enter auto, common ratios (e.g. 16:9), or a size like 1536x864 / 2560x1440 / 3840x2160, or use Reference Field',
+        'Enter auto, common ratios (e.g. 16:9), or a size like 1536x864 / 1536x1152 / 1152x1536 / 3840x2160, or use Reference Field',
       ratioTooltip:
-        'Controls aspect ratio or size. Supports standard sizes (1024×1024 / 1536×1024 / 1024×1536) and also accepts WxH (e.g. 1024x3072). Validity is determined by the API.',
+        'Controls aspect ratio or size. Current mappings: 1:1 -> 1024x1024, 16:9 -> 1536x1024, 9:16 -> 1024x1536, 4:3 -> 1536x1152, 3:4 -> 1152x1536. Also accepts WxH (e.g. 1024x3072). Validity is determined by the API.',
       modelLabel: 'AI model',
       modelPlaceholder: 'Enter model name, or use Reference Field',
       modelTooltip: 'Official GPT Image models',
@@ -182,9 +182,9 @@ fieldDecoratorKit.setDecorator({
         'API の quality に対応。1k は試作、2k は通常利用、4k はポスター・細部重視向け。行ごとにフィールド参照可。',
       ratioLabel: '比率',
       ratioPlaceholder:
-        'auto、1:1、16:9、9:16 等、または size（例：1536x864 / 2560x1440 / 3840x2160）、またはフィールド参照',
+        'auto、1:1、16:9、9:16、4:3、3:4 など、または size（例：1536x864 / 1536x1152 / 1152x1536 / 3840x2160）、またはフィールド参照',
       ratioTooltip:
-        '比率または size を指定。標準サイズ（1024×1024 / 1536×1024 / 1024×1536）に対応し、WxH（例：1024x3072）も入力可能。可否は API 側で判定されます。',
+        '比率または size を指定。現在の比率マッピングは 1:1 -> 1024x1024、16:9 -> 1536x1024、9:16 -> 1024x1536、4:3 -> 1536x1152、3:4 -> 1152x1536。WxH（例：1024x3072）も入力可能で、可否は API 側で判定されます。',
       modelLabel: 'AI モデル',
       modelPlaceholder: 'モデル名を入力、または「フィールド参照」',
       modelTooltip: 'GPT Image 公式モデル',
@@ -407,11 +407,17 @@ function resolveRatioToSize(ratio?: string): string {
   if (aspect === 'auto') {
     return 'auto';
   }
-  if (aspect === '9:16' || aspect === '9:21' || aspect === '3:4') {
+  if (aspect === '9:16' || aspect === '9:21') {
     return '1024x1536';
   }
-  if (aspect === '16:9' || aspect === '21:9' || aspect === '4:3') {
+  if (aspect === '16:9' || aspect === '21:9') {
     return '1536x1024';
+  }
+  if (aspect === '3:4') {
+    return '1152x1536';
+  }
+  if (aspect === '4:3') {
+    return '1536x1152';
   }
   if (aspect === '1:1') {
     return '1024x1024';
